@@ -1,4 +1,5 @@
 import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+import pagination from "./pagination.js";
 
 // let productModal = null;
 // let delProductModal = null;
@@ -13,9 +14,14 @@ createApp({
       products: [],
       isNew: false, //判斷是編輯或新增所使用，新增為true，編輯為false
       tempProduct: {
-        imagesUrl: [], //因為可能會傳多張圖片，所以初始化時先寫上陣列
+        //imagesUrl: [], //改利用createImages() 加入陣列
       },
+      pagination: {}, //儲存分頁資料
     };
+  },
+  // 因為區域元素可以加入很多個子元件，所以要加上s
+  components: {
+    pagination,
   },
   mounted() {
     console.log(bootstrap);
@@ -35,7 +41,7 @@ createApp({
 
     // 取出 Token
     const token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
+      /(?:(?:^|.*;\s*)rubyToken\s*=\s*([^;]*).*$)|^.*$/,
       "$1"
     );
     axios.defaults.headers.common.Authorization = token; // 意即在下次發送axios時，就會把token直接帶入headers中
@@ -57,25 +63,34 @@ createApp({
         });
     },
     // step 2 : 渲染所有產品至畫面上
-    getData() {
-      const url = `${this.apiUrl}/api/${this.apiPath}/admin/products/all`;
+    //傳入page參數來決定頁數，且可用預設參數=1，即當都沒有寫頁數時就為1
+    getData(page = 1) {
+      //加上網址的參數?page=${page}
+      const url = `${this.apiUrl}/api/${this.apiPath}/admin/products?page=${page}`;
+
       axios
         .get(url)
         .then((response) => {
+          const { products, pagination } = response.data;
+          // this.products = products;
+          // console.log(this.products);
+
+          this.pagination = response.data.pagination; //外層定義的page
           this.products = response.data.products;
-          console.log(this.products);
+          console.log(response.data);
         })
         .catch((err) => {
-          console.log(err);
           alert(err.response.data.message);
+          window.location = "index.html";
         });
     },
 
     //step 3 : 判斷是開啟新增或編輯(其中新增或編輯modal可用 this.isNew判別)或刪除產品的modal
     openModal(status, item) {
       console.log(status);
-      productModal.show();
+      // productModal.show();
       if (status === "new") {
+        productModal.show();
         this.isNew = true; //true表示為新增，開啟新增modal且要帶入初始化的資料
         //帶入上方初始化資料，因為建立新產品時初始資料欄位要清空
         this.tempProduct = {
@@ -131,6 +146,7 @@ createApp({
           alert(err.response.data.message);
         });
     },
+    //因為初始化時沒有在tempProduct寫上陣列，所以加入此方法
     createImages() {
       this.tempProduct.imagesUrl = [];
       this.tempProduct.imagesUrl.push("");

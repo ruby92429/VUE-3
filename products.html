@@ -66,6 +66,15 @@
             </tr>
           </tbody>
         </table>
+        <!-- 分頁元件 -->
+        <!-- props寫法 -->
+        <!-- 動態資源v-bind的方式口訣:前內(即props定義的名稱)後外(外層元件的變數名稱) -->
+        <!-- 呼叫getData方法得知分頁且用props，前內(getData大寫要改-變小寫)後外 -->
+        <pagination :pageies="pagination" :get-data="getData"></pagination>
+        <!-- emit寫法 -->
+        <!-- 因為觸發的是事件，使用v-on方式觸發外層方法(前內後外) -->
+        <!-- <pagination :pageies="pagination" @change-page="getData"></pagination> -->
+        <!-- 分頁元件 -->
       </div>
       <!-- Modal -->
       <div
@@ -131,13 +140,22 @@
                       v-if="!tempProduct.imagesUrl.length || tempProduct.imagesUrl[tempProduct.imagesUrl.length - 1]"
                     >
                       <!-- 新增於陣列push -->
-                      <button
+                      <!-- <button
                         class="btn btn-outline-primary btn-sm d-block w-100"
                         @click="tempProduct.imagesUrl.push('')"
                       >
                         新增圖片
+                      </button> -->
+
+                      <!-- 改利用createImages() 新增於陣列push -->
+                      <button
+                        class="btn btn-outline-primary btn-sm d-block w-100"
+                        @click="createImages"
+                      >
+                        加入圖片
                       </button>
                     </div>
+
                     <!-- 如果有空白欄位才能刪除 -->
                     <div v-else>
                       <!-- 刪減於陣列pop -->
@@ -148,14 +166,6 @@
                         刪除圖片
                       </button>
                     </div>
-                  </div>
-                  <div v-else>
-                    <button
-                      class="btn btn-outline-primary btn-sm d-block w-100"
-                      @click="createImages"
-                    >
-                      新增圖片
-                    </button>
                   </div>
                 </div>
                 <div class="col-sm-8">
